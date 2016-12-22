@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+      <!--
+       <context:property-placeholder location="classpath:redis.properties" />
+
+       <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+              <property name="maxIdle" value="${redis.maxIdle}" />
+              <property name="maxTotal" value="${redis.maxActive}" />
+              <property name="maxWaitMillis" value="${redis.maxWait}" />
+              <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+       </bean>
+
+       <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+             p:host-name="${redis.host}" p:port="${redis.port}" p:password="${redis.pass}"  p:pool-config-ref="poolConfig"/>
+
+       <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+              <property name="connectionFactory"   ref="connectionFactory" />
+       </bean>
+       -->
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="200"/>
+        <property name="maxIdle" value="10"/>
+        <property name="maxWaitMillis" value="3000"/>
+        <property name="minIdle" value="1"/>
+        <property name="testOnBorrow" value="true"/>
+    </bean>
+
+
+    <bean id="jedisFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="port" value="6379"/>
+        <property name="hostName" value="10.3.11.147"/>
+        <property name="poolConfig">
+            <ref bean="jedisPoolConfig"/>
+        </property>
+        <property name="timeout" value="10000"/>
+    </bean>
+
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisFactory"/>
+        <!--如果不配置Serializer，那么存储的时候智能使用String，如果用User类型存储，那么会提示错误User can't cast to String！！！-->
+        <!--<property name="keySerializer">-->
+        <!--<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>-->
+        <!--</property>-->
+        <!--<property name="valueSerializer">-->
+        <!--<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>-->
+        <!--</property>-->
+    </bean>
+<!--
+    <bean id="listener" class="com.dengyang.redis.TestMessage"/>
+
+    <redis:listener-container connection-factory="jedisFactory">
+        &lt;!&ndash; the method attribute can be skipped as the default method name is "handleMessage" &ndash;&gt;
+        &lt;!&ndash; topic代表监听的频道，是一个正规匹配  其实就是你要订阅的频道&ndash;&gt;
+        <redis:listener ref="listener" method="handleMessage" topic="*"/>
+    </redis:listener-container>-->
+</beans>

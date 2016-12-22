@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--单机定时器配置-->
+
+    <!-- 任务实体 -->
+    <bean id="testTaskBean" class="com.bin.quartz.ScanDirectory" />
+
+    <!-- 方式二：使用MethodInvokingJobDetailFactoryBean，任务类可以不实现Job接口，通过targetMethod指定调用方法-->
+    <!-- 定义目标bean和bean中的方法 -->
+    <bean id="SpringQtzJobMethod" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+           <property name="targetObject">
+                  <ref bean="testTaskBean"/>
+           </property>
+           <property name="targetMethod">  <!-- 要执行的方法名称 -->
+                  <value>aa</value>
+           </property>
+    </bean>
+
+    <!-- ======================== 调度触发器 ======================== -->
+    <bean id="CronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+           <property name="jobDetail" ref="SpringQtzJobMethod"></property>
+           <property name="cronExpression" value="0/5 * * * * ?"></property>
+    </bean>
+
+    <!-- ======================== 调度工厂 ======================== -->
+    <bean id="SpringJobSchedulerFactoryBean" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+           <property name="triggers">
+                  <list>
+                         <ref bean="CronTriggerBean"/>
+                  </list>
+           </property>
+    </bean>
+
+
+
+    <!-- 集群配置-->
+<!--
+
+    <bean name="analysisScheduleTask-bean" class="com.bin.quartz.AnalysisScheduleTask"></bean>
+
+    &lt;!&ndash; ********************2、动态创建日志记录表jobdetail******************** &ndash;&gt;
+
+    <bean id="createTableTask-jobdetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        &lt;!&ndash; durability 表示任务完成之后是否依然保留到数据库，默认false &ndash;&gt;
+        <property name="durability" value="true"/>
+        <property name="requestsRecovery" value="true"/>
+        <property name="jobClass">
+            &lt;!&ndash;MethodInvokingJobDetailFactoryBean类中的methodInvoking方法，是不支持序列化的，因此在把
+            QUARTZ 的 TASK 序列化进入数据库时就会抛错。所以我们要自己实现MethodInvokingJobDetailFactoryBean
+            的功能，这里用MyDetailQuartzJobBean替换。 &ndash;&gt;
+            <value>com.bin.quartz.MyDetailQuartzJobBean</value>
+        </property>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="targetObject" value="analysisScheduleTask-bean"/>
+                &lt;!&ndash;方法名 &ndash;&gt;
+                <entry key="targetMethod" value="createTableTask"/>
+            </map>
+        </property>
+        <property name="description" value="创建表信息任务"/>
+    </bean>
+
+    <bean id="secheduleTask-jobdetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        &lt;!&ndash; durability 表示任务完成之后是否依然保留到数据库，默认false &ndash;&gt;
+        <property name="durability" value="true"/>
+        <property name="requestsRecovery" value="true"/>
+        <property name="jobClass">
+            &lt;!&ndash;MethodInvokingJobDetailFactoryBean类中的methodInvoking方法，是不支持序列化的，因此在把
+            QUARTZ 的 TASK 序列化进入数据库时就会抛错。所以我们要自己实现MethodInvokingJobDetailFactoryBean
+            的功能，这里用MyDetailQuartzJobBean替换。 &ndash;&gt;
+            <value>com.bin.quartz.MyDetailQuartzJobBean</value>
+        </property>
+        <property name="jobDataAsMap">
+            <map>
+                &lt;!&ndash;关联bean &ndash;&gt;
+                <entry key="targetObject" value="analysisScheduleTask-bean"/>
+                &lt;!&ndash;方法名 &ndash;&gt;
+                <entry key="targetMethod" value="secheduleTask"/>
+            </map>
+        </property>
+        <property name="description" value="调度任务栈"/>
+    </bean>
+
+
+    &lt;!&ndash; ********************3、配置触发器时间******************** &ndash;&gt;
+    <bean id="createTableTask-trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        &lt;!&ndash;关联日志 &ndash;&gt;
+        <property name="jobDetail" ref="createTableTask-jobdetail"/>
+        &lt;!&ndash;时间配置 &ndash;&gt;
+        <property name="cronExpression" value="0/1 * * * * ?"/>
+        &lt;!&ndash;描述信息 &ndash;&gt;
+        <property name="description" value="创建表信息"/>
+    </bean>
+    <bean id="secheduleTask-trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        &lt;!&ndash;关联日志 &ndash;&gt;
+        <property name="jobDetail" ref="secheduleTask-jobdetail"/>
+        &lt;!&ndash;时间配置 &ndash;&gt;
+        <property name="cronExpression" value="0/1 * * * * ?"/>
+        &lt;!&ndash;描述信息 &ndash;&gt;
+        <property name="description" value="调度任务栈"/>
+    </bean>
+    &lt;!&ndash; ********************4、注册调度任务********************  &ndash;&gt;
+    <bean id="mapScheduler" lazy-init="false" autowire="no"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean" destroy-method="destroy">
+        <property name="dataSource">
+            <ref bean="dataSource"/>
+        </property>
+        &lt;!&ndash;可选，QuartzScheduler启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了 &ndash;&gt;
+        <property name="overwriteExistingJobs" value="true"/>
+        &lt;!&ndash;必须的，QuartzScheduler延时启动，应用启动完后QuartzScheduler再启动 &ndash;&gt;
+        <property name="startupDelay" value="5"/>
+        &lt;!&ndash;设置自动启动 &ndash;&gt;
+        <property name="autoStartup" value="true"/>
+        <property name="triggers">
+            <list>
+                <ref bean="createTableTask-trigger"/>
+                <ref bean="secheduleTask-trigger"/>
+            </list>
+        </property>
+        <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
+        <property name="configLocation" value="classpath:quartz.properties"/>
+    </bean>
+-->
+
+</beans>

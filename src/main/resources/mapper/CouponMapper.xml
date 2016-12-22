@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bin.dao.CouponMapper">
+
+    <resultMap id="couponMap" type="com.bin.entity.CouponDO">
+        <result column="id" property="id"/>
+        <result column="coupon_name" property="couponName"/>
+        <result column="coupon_type" property="couponType"/>
+        <result column="coupon_amt" property="couponAmt"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="status" property="status"/>
+        <result column="max_count" property="maxCount"/>
+        <result column="trigger_type" property="triggerType"/>
+        <result column="recharge_min_fee" property="rechargeMinFee"/>
+        <result column="recharge_repeat_trigger_flag" property="rechargeRepeatTriggerFlag"/>
+        <result column="pay_min_fee" property="payMinFee"/>
+        <result column="pay_repeat_trigger_flag" property="payRepeatTriggerFlag"/>
+        <result column="use_min_fee" property="useMinFee"/>
+        <result column="use_max_fee" property="useMaxFee"/>
+        <result column="use_biz_type" property="useBizType"/>
+        <result column="create_code" property="createCode"/>
+        <result column="modify_code" property="modifyCode"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modify" property="gmtModify"/>
+        <result column="attributes" property="attributeString"/>
+        <result column="version" property="version"/>
+        <result column="visible" property="visible"/>
+    </resultMap>
+
+    <select id="queryCouponMap" parameterType="com.bin.entity.CouponDO" resultMap="couponMap">
+        SELECT
+        *
+        FROM
+        y_coupon
+        <trim prefix="where" prefixOverrides="AND |OR ">
+            <if test="@com.bin.util.Ognl@isNotEmpty(id)">and id = #{id}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(couponName)">and coupon_name = #{couponName}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(couponType)">and coupon_type = #{couponType}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(couponAmt)">and coupon_amt = #{couponAmt}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(startTime)">and start_time = #{startTime}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(endTime)">and end_time = #{endTime}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(status)">and status = #{status}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(maxCount)">and max_count = #{maxCount}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(triggerType)">and trigger_type = #{triggerType}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(rechargeMinFee)">and recharge_min_fee = #{rechargeMinFee}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(rechargeRepeatTriggerFlag)">and recharge_repeat_trigger_flag = #{rechargeRepeatTriggerFlag}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(payMinFee)">and pay_min_fee = #{payMinFee}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(payRepeatTriggerFlag)">and pay_repeat_trigger_flag = #{payRepeatTriggerFlag}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(useMinFee)">and use_min_fee = #{useMinFee}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(useMaxFee)">and use_max_fee = #{useMaxFee}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(useBizType)">and use_biz_type = #{useBizType}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(createCode)">and create_code = #{createCode}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(modifyCode)">and modify_code = #{modifyCode}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(gmtCreate)">and gmt_create = #{gmtCreate}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(gmtModify)">and gmt_modify = #{gmtModify}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(version)">and version = #{version}</if>
+            <if test="@com.bin.util.Ognl@isNotEmpty(visible)">and visible = #{visible}</if>
+        </trim>
+        ORDER BY gmt_create
+    </select>
+
+</mapper>
